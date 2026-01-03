@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}My Quizzes - QuizMaster{% endblock %}
+
+{% block content %}
+<div class="detail-header">
+    <div class="container">
+        <h1>📚 My Quizzes</h1>
+        <div class="meta">
+            <span>Manage and view all your created quizzes</span>
+        </div>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container">
+        <div class="search-filter-container">
+            <form method="GET" class="search-filter-form">
+                <div class="search-input-group">
+                    <input type="text" name="q" placeholder="Search your quizzes..." value="{{ search_query }}" class="search-input">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+                <div class="filter-input-group">
+                    <select name="category" class="filter-select" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"i" %}selected{% endif %}>
+                                {{ category.title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if search_query or selected_category %}
+                        <a href="{% url 'my_quizes' %}" class="btn btn-outline">Reset</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+            <h2 class="section-title" style="margin-bottom: 0;">Your Quizzes ({{ quizes.count }})</h2>
+            <a href="{% url 'quiz_create' %}" class="btn btn-primary">+ Create New Quiz</a>
+        </div>
+        
+        {% if quizes %}
+        <div class="cards-grid">
+            {% for quiz in quizes %}
+            <div class="card">
+                <span class="badge {% if quiz.public %}badge-primary{% else %}badge-secondary{% endif %}">
+                    {% if quiz.public %}Public{% else %}Private{% endif %}
+                </span>
+                <h3 class="card-title">{{ quiz.title }}</h3>
+                {% if quiz.description %}
+                <p class="card-description">{{ quiz.description|truncatewords:20 }}</p>
+                {% endif %}
+                <div class="card-meta">
+                    <span>📁 {{ quiz.category.title }}</span>
+                    <span>📝 {{ quiz.questions.count }} questions</span>
+                    <span>📅 {{ quiz.date_created|date:"M d, Y" }}</span>
+                </div>
+                <div class="card-actions">
+                    <a href="{% url 'quiz_detail' quiz.pk %}" class="btn btn-primary">View</a>
+                    <a href="{% url 'add_question' quiz.pk %}" class="btn btn-outline">Add Question</a>
+                    {% if not quiz.public %}
+                    <form method="post" action="{% url 'publish_quiz' quiz.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">Publicate</button>
+                    </form>
+                    {% endif %}
+                    <a href="{% url 'delete_quiz' quiz.pk %}" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <h3>No Quizzes Yet</h3>
+            <p>You haven't created any quizzes yet. Start creating your first quiz!</p>
+            <a href="{% url 'quiz_create' %}" class="btn btn-primary" style="margin-top: 20px;">Create Your First Quiz</a>
+        </div>
+        {% endif %}
+        
+        <div style="margin-top: 40px;">
+            <a href="{% url 'main' %}" class="btn btn-outline">← Back to Home</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

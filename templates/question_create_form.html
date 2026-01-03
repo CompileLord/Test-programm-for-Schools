@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Question - QuizMaster{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-card">
+        <h1 class="form-title">Add New Question</h1>
+        <p class="form-subtitle">Add a question to your quiz</p>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h3>Question</h3>
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                    <span class="helptext">{{ field.help_text }}</span>
+                    {% endif %}
+                    {% if field.errors %}
+                    <ul class="errorlist">
+                        {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-section">
+                <h3>Choices</h3>
+                {{ choices.management_form }}
+                {% for choice_form in choices %}
+                <div class="choice-item" style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                    {% for field in choice_form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Add Question</button>
+            </div>
+        </form>
+        
+        <div class="form-footer">
+            <a href="{% url 'quiz_detail' view.kwargs.pk %}">← Back to Quiz</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

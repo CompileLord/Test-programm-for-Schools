@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}QuizMaster - Create & Take Quizzes{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content container">
+        <h1>Master Any Subject with Quizzes</h1>
+        <p>Create interactive quizzes, test your knowledge, and learn smarter.</p>
+        {% if user.is_authenticated %}
+            <a href="{% url 'quiz_create' %}" class="btn btn-secondary">Create Your Quiz</a>
+        {% else %}
+            <a href="{% url 'register' %}" class="btn btn-secondary">Get Started Free</a>
+        {% endif %}
+    </div>
+</section>
+
+{% if user.is_authenticated and user_tests %}
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">Your Quizzes</h2>
+        <div class="cards-grid">
+            {% for quiz in user_tests %}
+            <div class="card">
+                <span class="badge {% if quiz.public %}badge-primary{% else %}badge-secondary{% endif %}">
+                    {% if quiz.public %}Public{% else %}Private{% endif %}
+                </span>
+                <h3 class="card-title">{{ quiz.title }}</h3>
+                <div class="card-meta">
+                    <span>📝 {{ quiz.questions.count }} questions</span>
+                    <span>📅 {{ quiz.date_created|date:"M d, Y" }}</span>
+                </div>
+                <div class="card-actions">
+                    <a href="{% url 'quiz_detail' quiz.pk %}" class="btn btn-primary">View Quiz</a>
+                    <a href="{% url 'add_question' quiz.pk %}" class="btn btn-outline">Add Question</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">Public Quizzes</h2>
+        
+        <div class="search-filter-container">
+            <form method="GET" action="{% url 'main' %}" class="search-filter-form">
+                <div class="search-input-group">
+                    <input type="text" name="q" value="{{ search_query }}" placeholder="Search public quizzes..." class="search-input">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+                
+                <div class="filter-input-group">
+                    <select name="category" class="filter-select" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"i" %}selected{% endif %}>
+                                {{ category.title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    
+                    {% if search_query or selected_category %}
+                        <a href="{% url 'main' %}" class="btn btn-outline">Reset</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        {% if quizes %}
+        <div class="cards-grid">
+            {% for quiz in quizes %}
+            {% if quiz.public %}
+            <div class="card">
+                <span class="badge badge-primary">Public</span>
+                <h3 class="card-title">{{ quiz.title }}</h3>
+                <div class="card-meta">
+                    <span>👤 {{ quiz.user.username }}</span>
+                    <span>📝 {{ quiz.questions.count }} questions</span>
+                    <span>📅 {{ quiz.date_created|date:"M d, Y" }}</span>
+                </div>
+                <div class="card-actions">
+                    <a href="{% url 'quiz_detail' quiz.pk %}" class="btn btn-primary">View Quiz</a>
+                </div>
+            </div>
+            {% endif %}
+            {% empty %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📚</div>
+                <h3>No Public Quizzes Yet</h3>
+                <p>Be the first to create a quiz and share it with the community!</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📚</div>
+            <h3>No Public Quizzes Yet</h3>
+            <p>Be the first to create a quiz and share it with the community!</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

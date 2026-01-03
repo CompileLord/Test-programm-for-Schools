@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Take Quiz: {{ quiz.title }} - QuizMaster{% endblock %}
+
+{% block content %}
+<div class="detail-header">
+    <div class="container">
+        <h1>{{ quiz.title }}</h1>
+        <div class="meta">
+            <span>📝 {{ questions.count }} questions</span>
+            <span>⏱️ Take your time, answer carefully</span>
+        </div>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container">
+        <form method="post" class="quiz-form" id="quiz-form">
+            {% csrf_token %}
+            
+            {% for question in questions %}
+            <div class="quiz-question-card">
+                <div class="quiz-question-header">
+                    <span class="quiz-question-number">Question {{ forloop.counter }}</span>
+                </div>
+                <h3 class="quiz-question-text">{{ question.text }}</h3>
+                <div class="quiz-choices">
+                    {% for choice in question.choices.all %}
+                    <label class="quiz-choice">
+                        <input type="radio" name="question_{{ question.id }}" value="{{ choice.id }}" required>
+                        <span class="quiz-choice-text">{{ choice.text }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <div class="empty-state-icon">❓</div>
+                <h3>No Questions Available</h3>
+                <p>This quiz doesn't have any questions yet.</p>
+            </div>
+            {% endfor %}
+            
+            {% if questions %}
+            <div class="quiz-submit-section">
+                <button type="submit" class="btn btn-primary btn-large">
+                    ✓ Submit Answers
+                </button>
+                <a href="{% url 'quiz_detail' quiz.pk %}" class="btn btn-outline">Cancel</a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</section>
+{% endblock %}

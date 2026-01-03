@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}My History - QuizMaster{% endblock %}
+
+{% block content %}
+<div class="detail-header">
+    <div class="container">
+        <h1>📜 My History</h1>
+        <div class="meta">
+            <span>Review your past quiz attempts</span>
+        </div>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+            <h2 class="section-title" style="margin:0;">Attempts ({{ history.count }})</h2>
+            <a href="{% url 'main' %}" class="btn btn-outline">🏠 Home</a>
+        </div>
+
+        {% if history %}
+            <div class="cards-grid">
+                {% for attempt in history %}
+                <div class="card">
+                    <h3 class="card-title">{{ attempt.quiz.title }}</h3>
+                    <div class="card-meta">
+                        <span>📅 {{ attempt.date_taken|date:"F d, Y H:i" }}</span>
+                        <span>📝 {{ attempt.score }}/{{ attempt.total_questions }}</span>
+                        <span>🔢 {{ attempt.get_percentage }}%</span>
+                    </div>
+                    <div class="card-actions">
+                        <a href="{% url 'quiz_results' attempt.pk %}" class="btn btn-primary">View Results</a>
+                        <a href="{% url 'quiz_detail' attempt.quiz.pk %}" class="btn btn-outline">View Quiz</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>No Attempts Yet</h3>
+                <p>You haven't taken any quizzes yet. Try one from the catalog!</p>
+                <a href="{% url 'main' %}" class="btn btn-primary" style="margin-top:16px;">Explore Quizzes</a>
+            </div>
+        {% endif %}
+
+        <div style="margin-top:32px;">
+            <strong>Total attempts:</strong> {{ count_test.id__count }}
+        </div>
+    </div>
+</section>
+{% endblock %}

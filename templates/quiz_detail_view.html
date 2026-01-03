@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ quiz.title }} - QuizMaster{% endblock %}
+
+{% block content %}
+<div class="detail-header">
+    <div class="container">
+        <span class="badge {% if quiz.public %}badge-primary{% else %}badge-secondary{% endif %}" style="margin-bottom: 16px; background: rgba(255,255,255,0.2); color: white;">
+            {% if quiz.public %}Public{% else %}Private{% endif %}
+        </span>
+        {% if is_owner and quiz.public %}
+        <span class="badge published-badge">✓ Published</span>
+        {% endif %}
+        <h1>{{ quiz.title }}</h1>
+        <div class="meta">
+            <span>👤 Created by {{ quiz.user.username }}</span>
+            <span>📅 {{ quiz.date_created|date:"F d, Y" }}</span>
+            <span>📝 {{ quiz.questions.count }} questions</span>
+        </div>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
+            <h2 class="section-title" style="margin-bottom: 0;">Questions</h2>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                {% if user == quiz.user %}
+                <a href="{% url 'add_question' quiz.pk %}" class="btn btn-primary">+ Add Question</a>
+                {% endif %}
+                {% if can_take_test %}
+                <a href="{% url 'take_quiz' quiz.pk %}" class="btn btn-secondary">🎯 Start Test</a>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if quiz.questions.all %}
+        <ol class="question-list">
+            {% for question in quiz.questions.all %}
+            <li class="question-item">
+                <span class="question-number">{{ forloop.counter }}</span>
+                <span class="question-text">{{ question.text }}</span>
+            </li>
+            {% endfor %}
+        </ol>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">❓</div>
+            <h3>No Questions Yet</h3>
+            <p>This quiz doesn't have any questions yet.</p>
+            {% if user == quiz.user %}
+            <a href="{% url 'add_question' quiz.pk %}" class="btn btn-primary" style="margin-top: 20px;">Add Your First Question</a>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <div style="margin-top: 40px;">
+            <a href="{% url 'main' %}" class="btn btn-outline">← Back to Home</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
