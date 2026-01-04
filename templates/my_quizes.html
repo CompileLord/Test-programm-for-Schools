@@ -36,8 +36,8 @@
             </form>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
-            <h2 class="section-title" style="margin-bottom: 0;">Your Quizzes ({{ quizes.count }})</h2>
+        <div class="section-header-actions">
+            <h2 class="section-title">Your Quizzes ({{ quizes.count }})</h2>
             <a href="{% url 'quiz_create' %}" class="btn btn-primary">+ Create New Quiz</a>
         </div>
         
@@ -58,15 +58,16 @@
                     <span>📅 {{ quiz.date_created|date:"M d, Y" }}</span>
                 </div>
                 <div class="card-actions">
-                    <a href="{% url 'quiz_detail' quiz.pk %}" class="btn btn-primary">View</a>
-                    <a href="{% url 'add_question' quiz.pk %}" class="btn btn-outline">Add Question</a>
+                    <a href="{% url 'quiz_detail' quiz.pk %}" class="btn btn-primary btn-sm">View</a>
+                    <a href="{% url 'update_quiz' quiz.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+                    <a href="{% url 'add_question' quiz.pk %}" class="btn btn-outline btn-sm">Add Question</a>
                     {% if not quiz.public %}
                     <form method="post" action="{% url 'publish_quiz' quiz.pk %}" style="display:inline;">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-success">Publicate</button>
+                        <button type="submit" class="btn btn-success btn-sm">Publicate</button>
                     </form>
                     {% endif %}
-                    <a href="{% url 'delete_quiz' quiz.pk %}" class="btn btn-danger">Delete</a>
+                    <a href="{% url 'delete_quiz' quiz.pk %}" class="btn btn-danger btn-sm">Delete</a>
                 </div>
             </div>
             {% endfor %}

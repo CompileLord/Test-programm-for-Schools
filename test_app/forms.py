@@ -18,3 +18,10 @@ ChoiceFormSet = inlineformset_factory(
     extra=4,
     can_delete=False
 )
+
+ChoiceUpdateFormSet = inlineformset_factory(
+    Question, Choice,
+    fields=['text', 'is_correct'],
+    extra=0,
+    can_delete=True
+)

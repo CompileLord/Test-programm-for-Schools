@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Explore Quizzes - QuizMaster{% endblock %}
+
+{% block content %}
+<div class="detail-header">
+    <div class="container">
+        <h1>Explore Quizzes</h1>
+        <p class="meta">Discover new quizzes across various categories</p>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container">
+        {% for category in categories %}
+            {% if category.quiz_set.exists %}
+            <div class="category-section">
+                <h2 class="section-title">{{ category.title }}</h2>
+                <div class="cards-grid">
+                    {% for quiz in category.quiz_set.all %}
+                        {% if quiz.public %}
+                        <div class="card">
+                            <span class="badge badge-primary">Public</span>
+                            <h3 class="card-title">{{ quiz.title }}</h3>
+                            <div class="card-meta">
+                                <span>👤 {{ quiz.user.username }}</span>
+                                <span>📝 {{ quiz.questions.count }} questions</span>
+                            </div>
+                            <div class="card-actions">
+                                <a href="{% url 'quiz_detail' quiz.pk %}" class="btn btn-primary">View Quiz</a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        {% empty %}
+            <div class="empty-state">
+                <div class="empty-state-icon">🔍</div>
+                <h3>No Categories Found</h3>
+                <p>Check back later for new content!</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}

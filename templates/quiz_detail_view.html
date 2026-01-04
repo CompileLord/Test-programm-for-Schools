@@ -5,7 +5,7 @@
 {% block content %}
 <div class="detail-header">
     <div class="container">
-        <span class="badge {% if quiz.public %}badge-primary{% else %}badge-secondary{% endif %}" style="margin-bottom: 16px; background: rgba(255,255,255,0.2); color: white;">
+        <span class="badge {% if quiz.public %}badge-primary{% else %}badge-secondary{% endif %}">
             {% if quiz.public %}Public{% else %}Private{% endif %}
         </span>
         {% if is_owner and quiz.public %}
@@ -22,7 +22,7 @@
 
 <section class="section">
     <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
+        <div class="section-header-actions">
             <h2 class="section-title" style="margin-bottom: 0;">Questions</h2>
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                 {% if user == quiz.user %}
@@ -38,8 +38,16 @@
         <ol class="question-list">
             {% for question in quiz.questions.all %}
             <li class="question-item">
-                <span class="question-number">{{ forloop.counter }}</span>
-                <span class="question-text">{{ question.text }}</span>
+                <div class="question-content">
+                    <span class="question-number">{{ forloop.counter }}</span>
+                    <span class="question-text">{{ question.text }}</span>
+                </div>
+                {% if user == quiz.user %}
+                <div class="question-actions">
+                    <a href="{% url 'update_question' question.pk %}" class="btn btn-outline btn-sm">Edit</a>
+                    <a href="{% url 'delete_question' question.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                </div>
+                {% endif %}
             </li>
             {% endfor %}
         </ol>

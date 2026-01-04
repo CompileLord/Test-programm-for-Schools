@@ -4,63 +4,78 @@
 
 {% block content %}
 <div class="form-container">
-    <div class="form-card">
-        <h1 class="form-title">Add New Question</h1>
-        <p class="form-subtitle">Add a question to your quiz</p>
+    <h1 class="form-title">{% if form.instance.pk %}Edit Question{% else %}Add New Question{% endif %}</h1>
+    <p class="form-subtitle">{% if form.instance.pk %}Update your question details{% else %}Add a question to your quiz{% endif %}</p>
+    
+    <form method="post">
+        {% csrf_token %}
         
-        <form method="post">
-            {% csrf_token %}
-            
-            <div class="form-section">
-                <h3>Question</h3>
-                {% for field in form %}
-                <div class="form-group">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.help_text %}
-                    <span class="helptext">{{ field.help_text }}</span>
-                    {% endif %}
-                    {% if field.errors %}
-                    <ul class="errorlist">
-                        {% for error in field.errors %}
-                        <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                    {% endif %}
-                </div>
-                {% endfor %}
+        <div class="form-section">
+            <h3 style="margin-bottom: 16px; color: var(--text-main);">Question Text</h3>
+            {% for field in form %}
+            <div class="form-group">
+                {{ field }}
+                {% if field.errors %}
+                <ul class="errorlist" style="color: var(--error);">
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
             </div>
+            {% endfor %}
+        </div>
 
-            <div class="form-section">
-                <h3>Choices</h3>
-                {{ choices.management_form }}
+        <div class="form-section" style="margin-top: 32px;">
+            <h3 style="margin-bottom: 16px; color: var(--text-main);">Answer Choices</h3>
+            <p style="margin-bottom: 16px; color: var(--text-muted); font-size: 0.9rem;">Mark the correct answer(s) using the checkbox.</p>
+            {{ choices.management_form }}
+            <div class="choices-grid">
                 {% for choice_form in choices %}
-                <div class="choice-item" style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                <div class="choice-item">
                     {% for field in choice_form %}
-                    <div class="form-group">
-                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {% if field.name == 'text' %}
+                        <div style="flex-grow: 1;">
+                            {{ field }}
+                        </div>
+                        {% elif field.name == 'is_correct' %}
+                        <div style="display: flex; align-items: center; gap: 8px;" title="Is this the correct answer?">
+                            {{ field }}
+                            <label for="{{ field.id_for_label }}" style="margin: 0; cursor: pointer;">Correct</label>
+                        </div>
+                        {% elif field.name == 'DELETE' %}
+                        <div style="display: flex; align-items: center; gap: 8px;" title="Delete this choice">
+                            {{ field }}
+                            <label for="{{ field.id_for_label }}" style="margin: 0; cursor: pointer; color: var(--error);">Delete</label>
+                        </div>
+                        {% else %}
                         {{ field }}
-                        {% if field.errors %}
-                        <ul class="errorlist">
-                            {% for error in field.errors %}
-                            <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
                         {% endif %}
-                    </div>
+                        
+                        {% if field.errors %}
+                        <div style="color: var(--error); font-size: 0.8rem;">
+                            {% for error in field.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
                 {% endfor %}
             </div>
-            
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Add Question</button>
-            </div>
-        </form>
-        
-        <div class="form-footer">
-            <a href="{% url 'quiz_detail' view.kwargs.pk %}">← Back to Quiz</a>
         </div>
+        
+        <div class="form-actions" style="margin-top: 32px;">
+            <button type="submit" class="btn btn-primary" style="width: 100%;">{% if form.instance.pk %}Save Changes{% else %}Add Question{% endif %}</button>
+        </div>
+    </form>
+    
+    <div class="form-footer">
+        {% if view.kwargs.pk %}
+        <a href="{% url 'quiz_detail' view.kwargs.pk %}">← Back to Quiz</a>
+        {% else %}
+        <a href="{% url 'quiz_detail' object.quiz.pk %}">← Back to Quiz</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

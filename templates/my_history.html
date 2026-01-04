@@ -14,12 +14,14 @@
 
 <section class="section">
     <div class="container">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <div class="section-header-actions">
             <h2 class="section-title" style="margin:0;">Attempts ({{ history.count }})</h2>
             <a href="{% url 'main' %}" class="btn btn-outline">🏠 Home</a>
         </div>
 
         {% if history %}
+        <a href="{% url 'main' %}" class="btn btn-outline">🗑️ Delete history</a>
+
             <div class="cards-grid">
                 {% for attempt in history %}
                 <div class="card">

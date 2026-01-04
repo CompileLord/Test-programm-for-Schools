@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ user.username }}'s Profile - QuizMaster{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    .profile-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+        border: 1px solid #eee;
+    }
+    .profile-header {
+        height: 120px;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    }
+    .profile-body {
+        padding: 0 2rem 2rem;
+        position: relative;
+    }
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        background: #f3f4f6;
+        border: 4px solid white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #6b7280;
+        margin-top: -50px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .profile-info {
+        margin-top: 1rem;
+    }
+    .profile-name {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+    }
+    .profile-email {
+        color: #6b7280;
+        margin-bottom: 1.5rem;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin: 2rem 0;
+    }
+    .stat-box {
+        background: #f9fafb;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid #f3f4f6;
+    }
+    .stat-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #9ca3af;
+        display: block;
+    }
+    .stat-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #374151;
+    }
+    .profile-actions {
+        display: flex;
+        gap: 1rem;
+        border-top: 1px solid #eee;
+        padding-top: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header"></div>
+        
+        <div class="profile-body">
+            <div class="profile-avatar">
+                {{ user.username|first|upper }}
+            </div>
+
+            <div class="profile-info">
+                <h1 class="profile-name">{{ user.username }}</h1>
+                <p class="profile-email">{{ user.email }}</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-label">Member Since</span>
+                    <span class="stat-value">{{ user.date_joined|date:"M Y" }}</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Last Active</span>
+                    <span class="stat-value">{{ user.last_login|timesince }} ago</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Account Status</span>
+                    <span class="stat-value" style="color: #059669;">Active</span>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <a href="{% url 'my_quizes' %}" class="btn btn-primary">My Quizzes</a>
+                <a href="{% url 'my_history' %}" class="btn btn-outline">History</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

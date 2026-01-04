@@ -5,7 +5,6 @@ from django.contrib.auth import logout
 from .models import User
 from .forms import UserRegistrationForm
 
-# Create your views here.
 class UserCreationView(CreateView):
     form_class = UserRegistrationForm
     template_name = 'register.html'

@@ -18,16 +18,20 @@
         <form method="post" class="quiz-form" id="quiz-form">
             {% csrf_token %}
             
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+            </div>
+
             {% for question in questions %}
-            <div class="quiz-question-card">
+            <div class="quiz-question-card" data-question-index="{{ forloop.counter0 }}" style="{% if not forloop.first %}display: none;{% endif %}">
                 <div class="quiz-question-header">
-                    <span class="quiz-question-number">Question {{ forloop.counter }}</span>
+                    <span class="quiz-question-number">Question {{ forloop.counter }} of {{ questions.count }}</span>
                 </div>
                 <h3 class="quiz-question-text">{{ question.text }}</h3>
                 <div class="quiz-choices">
                     {% for choice in question.choices.all %}
                     <label class="quiz-choice">
-                        <input type="radio" name="question_{{ question.id }}" value="{{ choice.id }}" required>
+                        <input type="radio" name="question_{{ question.id }}" value="{{ choice.id }}" required onchange="nextQuestion({{ forloop.parentloop.counter0 }})">
                         <span class="quiz-choice-text">{{ choice.text }}</span>
                     </label>
                     {% endfor %}
@@ -41,15 +45,43 @@
             </div>
             {% endfor %}
             
-            {% if questions %}
-            <div class="quiz-submit-section">
+            <div class="quiz-submit-section" id="submit-section" style="display: none;">
                 <button type="submit" class="btn btn-primary btn-large">
                     ✓ Submit Answers
                 </button>
-                <a href="{% url 'quiz_detail' quiz.pk %}" class="btn btn-outline">Cancel</a>
             </div>
-            {% endif %}
         </form>
     </div>
 </section>
+
+<script>
+    function nextQuestion(currentIndex) {
+        const questions = document.querySelectorAll('.quiz-question-card');
+        const totalQuestions = questions.length;
+        const progressBar = document.getElementById('progress-bar');
+        
+        // Update progress
+        const progress = ((currentIndex + 1) / totalQuestions) * 100;
+        progressBar.style.width = `${progress}%`;
+
+        // Delay to show selection feedback
+        setTimeout(() => {
+            if (currentIndex < totalQuestions - 1) {
+                questions[currentIndex].style.display = 'none';
+                questions[currentIndex + 1].style.display = 'block';
+                questions[currentIndex + 1].classList.add('fade-in');
+            } else {
+                questions[currentIndex].style.display = 'none';
+                document.getElementById('submit-section').style.display = 'flex';
+                document.getElementById('submit-section').classList.add('fade-in');
+                // Auto submit if desired, but user might want to review? 
+                // User said "automatically press next". For last one, maybe just show submit button or auto submit.
+                // "after selecting variant automatically press next".
+                // I'll show the submit button for the last one.
+                document.getElementById('quiz-form').submit();
+            }
+        }, 300);
+    }
+</script>
+
 {% endblock %}

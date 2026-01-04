@@ -8,7 +8,8 @@ from django.urls import reverse_lazy, reverse
 from django.db.models import Count, Sum, Q
 from .models import Quiz, Question, TestAttempt, Category, Choice
 from django.contrib.auth.models import User as AuthUser
-from .forms import QuizForm, QuestionForm, ChoiceFormSet
+from django.contrib.auth.models import User
+from .forms import QuizForm, QuestionForm, ChoiceFormSet, ChoiceUpdateFormSet
 
 class MainPageView(ListView):
     model = Quiz
@@ -92,6 +93,12 @@ class MyHistoryView(LoginRequiredMixin, ListView):
         context['count_test'] = TestAttempt.objects.filter(user=curr_user).aggregate(Count('id'))
         return context
 
+class ProfileView(LoginRequiredMixin, DetailView):
+    model = User
+    template_name = 'profile.html'
+    def get_object(self, queryset=None):
+        return self.request.user
+
 
 class PublishQuizView(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
@@ -102,14 +109,10 @@ class PublishQuizView(LoginRequiredMixin, View):
             online_user = AuthUser.objects.using('online').first()
         if not online_user:
             return redirect('my_quizes')
-
-        # Ensure category exists on online DB (use same title and image path)
         online_category, _ = Category.objects.using('online').get_or_create(
             title=quiz.category.title,
             defaults={'image': quiz.category.image}
         )
-
-        # Create the quiz on the online DB
         online_quiz = Quiz.objects.using('online').create(
             title=quiz.title,
             user=online_user,
@@ -118,14 +121,11 @@ class PublishQuizView(LoginRequiredMixin, View):
             public=True,
             date_created=quiz.date_created
         )
-
-        # Copy questions and choices
         for q in quiz.questions.all():
             online_q = Question.objects.using('online').create(quiz=online_quiz, text=q.text)
             for c in q.choices.all():
                 Choice.objects.using('online').create(question=online_q, text=c.text, is_correct=c.is_correct)
 
-        # Mark original as public and return
         quiz.public = True
         quiz.save()
         return redirect('my_quizes')
@@ -147,9 +147,36 @@ class CreateQuizView(LoginRequiredMixin, CreateView):
     model = Quiz
     template_name = 'quiz_create.html'
     form_class = QuizForm
+    def get(self, request, *args, **kwargs):
+        if not Category.objects.exists():
+            try:
+                online_categories = Category.objects.using('online').all()
+                for cat in online_categories:
+                    Category.objects.create(
+                        title=cat.title,
+                        image=cat.image
+                    )
+            except Exception:
+                pass
+        return super().get(request, *args, **kwargs)
+
     def form_valid(self, form):
         form.instance.user = self.request.user
         return super().form_valid(form)
+
+class UpdateQuizView(LoginRequiredMixin, UpdateView):
+    model = Quiz
+    template_name = 'quiz_create.html'
+    form_class = QuizForm
+    success_url = reverse_lazy('my_quizes')
+
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['update'] = True
+        return context
 
 class QuestionCreateView(LoginRequiredMixin, CreateView):
     model = Question
@@ -180,6 +207,40 @@ class QuestionCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse_lazy('add_question', kwargs={'pk': self.kwargs['pk']})
 
+
+class UpdateQuestionView(LoginRequiredMixin, UpdateView):
+    model = Question
+    form_class = QuestionForm
+    template_name = 'question_create_form.html'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        if self.request.POST:
+            data['choices'] = ChoiceUpdateFormSet(self.request.POST, instance=self.object)
+        else:
+            data['choices'] = ChoiceUpdateFormSet(instance=self.object)
+        return data
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        choices = context['choices']
+        if choices.is_valid():
+            self.object = form.save()
+            choices.instance = self.object
+            choices.save()
+            return super().form_valid(form)
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+    def get_success_url(self):
+        return reverse_lazy('quiz_detail', kwargs={'pk': self.object.quiz.pk})
+
+class DeleteQuestionView(LoginRequiredMixin, DeleteView):
+    model = Question
+    template_name = 'delete_confirm.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('quiz_detail', kwargs={'pk': self.object.quiz.pk})
 
 class QuizDetailView(DetailView):
     model = Quiz
@@ -289,3 +350,12 @@ class QuizResultsView(LoginRequiredMixin, DetailView):
         context['results'] = results
         context['quiz'] = quiz
         return context
+
+class ExploreView(ListView):
+    model = Category
+    template_name = 'explore.html'
+    context_object_name = 'categories'
+
+    def get_queryset(self):
+        return Category.objects.prefetch_related('quiz_set').all()
+

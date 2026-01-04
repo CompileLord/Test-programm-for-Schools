@@ -4,46 +4,44 @@
 
 {% block content %}
 <div class="form-container">
-    <div class="form-card">
-        <h1 class="form-title">Welcome Back</h1>
-        <p class="form-subtitle">Login to continue your learning journey</p>
+    <h1 class="form-title">Welcome Back</h1>
+    <p style="text-align: center; color: var(--text-muted); margin-bottom: var(--space-md);">Login to continue your learning journey</p>
+    
+    <form method="post">
+        {% csrf_token %}
         
-        <form method="post">
-            {% csrf_token %}
-            
-            {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}
-                <span class="helptext">{{ field.help_text }}</span>
-                {% endif %}
-                {% if field.errors %}
-                <ul class="errorlist">
-                    {% for error in field.errors %}
-                    <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-            </div>
-            {% endfor %}
-            
-            {% if form.non_field_errors %}
-            <div class="message error">
-                {% for error in form.non_field_errors %}
-                {{ error }}
-                {% endfor %}
-            </div>
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+            <span class="helptext" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-top: 0.25rem;">{{ field.help_text }}</span>
             {% endif %}
-            
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Login</button>
-            </div>
-        </form>
-        
-        <div class="form-footer">
-            Don't have an account? <a href="{% url 'register' %}">Register here</a>
+            {% if field.errors %}
+            <ul class="errorlist" style="color: var(--error); font-size: 0.875rem; margin-top: 0.25rem;">
+                {% for error in field.errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
         </div>
+        {% endfor %}
+        
+        {% if form.non_field_errors %}
+        <div class="message error">
+            {% for error in form.non_field_errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+        </div>
+    </form>
+    
+    <div class="form-footer">
+        Don't have an account? <a href="{% url 'register' %}">Register here</a>
     </div>
 </div>
 {% endblock %}
